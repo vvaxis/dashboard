@@ -1,0 +1,195 @@
+; EWW Dashboard — redtail (split-panel HUD)
+
+; --- Estado global ---
+(defvar dashboard-open false)
+(defvar cal-data '{"month":"","year":0,"monthNum":0,"currentMonth":0,"currentYear":0,"today":0,"weeks":[]}')
+(defvar cal-selected-day 0)
+(defvar events-data '{"date":"","dateLabel":"","events":[],"count":0}')
+
+; --- Listeners ---
+(deflisten music-data
+  :initial '{"title":"","artist":"","status":"Stopped"}'
+  `scripts/music.sh`)
+
+; --- Polls ---
+(defpoll weather-data
+  :interval "900s"
+  :initial '{"temp":"--","high":"--","low":"--","feels_like":"--","condition":"...","icon":"","humidity":0,"pop":0,"hourly":[]}'
+  `scripts/weather.py`)
+
+(defpoll notes-data
+  :interval "5s"
+  :initial '{"content":"","empty":true}'
+  `scripts/notes.sh`)
+
+; --- Widgets: Calendário ---
+
+(defwidget calendar-nav []
+  (box :class "cal-nav" :orientation "horizontal" :space-evenly false
+    (button :class "cal-nav-btn" :onclick "scripts/cal-navigate.sh prev" "󰅁")
+    (button :class "cal-nav-title" :hexpand true :onclick "scripts/cal-goto-today.sh"
+      "${cal-data.month} ${cal-data.year}")
+    (button :class "cal-nav-btn" :onclick "scripts/cal-navigate.sh next" "󰅂")))
+
+(defwidget day-names []
+  (box :class "day-names" :orientation "horizontal" :space-evenly true
+    (label :class "day-name" :text "Dom")
+    (label :class "day-name" :text "Seg")
+    (label :class "day-name" :text "Ter")
+    (label :class "day-name" :text "Qua")
+    (label :class "day-name" :text "Qui")
+    (label :class "day-name" :text "Sex")
+    (label :class "day-name" :text "Sáb")))
+
+(defwidget day-cell [day]
+  (eventbox
+    :class "day-cell-wrapper"
+    :onclick {day == 0 ? "" : "scripts/cal-select-day.sh ${day}"}
+    :cursor {day == 0 ? "default" : "pointer"}
+    (label
+      :class {day == 0 ? "day-cell day-empty"
+            : (day == cal-selected-day && day == cal-data.today) ? "day-cell day-selected day-today"
+            : day == cal-selected-day ? "day-cell day-selected"
+            : day == cal-data.today ? "day-cell day-today"
+            : "day-cell"}
+      :text {day == 0 ? "" : day})))
+
+(defwidget calendar-grid []
+  (box :class "cal-grid" :orientation "vertical" :space-evenly true
+    (for week in {cal-data.weeks}
+      (box :class "cal-week" :orientation "horizontal" :space-evenly true
+        (for day in week
+          (day-cell :day day))))))
+
+(defwidget cal-section []
+  (box :class "card calendar-card" :orientation "vertical" :space-evenly false
+    (calendar-nav)
+    (day-names)
+    (calendar-grid)))
+
+; --- Widgets: Eventos ---
+
+(defwidget events-section []
+  (box :class "card events-card" :orientation "vertical" :space-evenly false
+    (label :class "section-header" :halign "start"
+      :text {events-data.dateLabel != "" ? "  ${events-data.dateLabel}" : "  Eventos"})
+    (box :class "events-content" :orientation "vertical" :space-evenly false
+      ; No day selected
+      (label :class "events-empty" :halign "start"
+        :visible {events-data.dateLabel == ""}
+        :text "Selecione um dia")
+      ; Day selected but no events
+      (label :class "events-empty" :halign "start"
+        :visible {events-data.dateLabel != "" && events-data.count == 0}
+        :text "Nenhum evento")
+      ; Events list
+      (box :orientation "vertical" :space-evenly false :spacing 6
+        :visible {events-data.count > 0}
+        (for event in {events-data.events}
+          (box :class "event-row" :orientation "horizontal" :space-evenly false :spacing 10
+            (label :class "event-time" :text {event.time})
+            (label :class "event-title" :text {event.title} :limit-width 32 :hexpand true :halign "start")))))))
+
+; --- Widgets: Clima ---
+
+(defwidget weather-section []
+  (box :class "card weather-card" :orientation "vertical" :space-evenly false
+    (label :class "section-header" :halign "start" :text "  Clima")
+    (box :class "weather-current" :orientation "horizontal" :space-evenly false :spacing 12
+      (box :orientation "vertical" :space-evenly false :hexpand true
+        (box :orientation "horizontal" :space-evenly false :spacing 10
+          (label :class "weather-temp" :halign "start" :text "${weather-data.temp}°C")
+          (label :class "weather-highlow" :halign "start" :text "↑${weather-data.high}° ↓${weather-data.low}°"))
+        (label :class "weather-condition" :halign "start" :text {weather-data.condition}))
+      (label :class "weather-icon" :text {weather-data.icon}))
+    (box :class "weather-details" :orientation "horizontal" :space-evenly false :spacing 20
+      (label :class "weather-detail" :text "Sensação ${weather-data.feels_like}°")
+      (label :class "weather-detail" :text "Chance de chuva ${weather-data.pop}%"))
+    (box :class "weather-hourly" :orientation "horizontal" :space-evenly true :spacing 8
+      (for slot in {weather-data.hourly}
+        (box :class "hourly-slot" :orientation "vertical" :space-evenly false
+          (label :class "hourly-time" :text {slot.time})
+          (label :class "hourly-icon" :text {slot.icon})
+          (label :class "hourly-temp" :text "${slot.temp}°")
+          (label :class "hourly-pop" :text "${slot.pop}%"
+            :visible {slot.pop > 0}))))
+    (box :class "weather-more" :halign "end"
+      (button :class "weather-more-btn" :onclick "xdg-open 'https://www.google.com/search?q=previs%C3%A3o+do+tempo' &" "ver mais →"))))
+
+; --- Widgets: Notas ---
+
+(defwidget notes-section []
+  (eventbox
+    :class "notes-eventbox"
+    :onclick "foot micro ~/.local/share/dashboard/notes.md &"
+    :cursor "pointer"
+    (box :class "card notes-card" :orientation "vertical" :space-evenly false
+      (label :class "section-header" :halign "start" :text "  Notas")
+      (label :class "notes-content"
+        :halign "start"
+        :valign "start"
+        :wrap true
+        :text {notes-data.empty ? "Clique para adicionar notas..." : notes-data.content}))))
+
+; --- Widgets: Música ---
+
+(defwidget music-info []
+  (box :class "music-info" :orientation "vertical" :space-evenly false
+    (label :class {music-data.status == "Stopped" ? "music-title music-empty" : "music-title"}
+           :halign "start"
+           :limit-width 30
+           :text {music-data.title ?: "Nenhum player ativo"})
+    (label :class {music-data.status == "Stopped" ? "music-artist music-empty" : "music-artist"}
+           :halign "start"
+           :visible {music-data.status != "Stopped"}
+           :limit-width 30
+           :text {music-data.artist ?: ""})))
+
+(defwidget music-controls []
+  (box :class "music-controls" :orientation "horizontal" :space-evenly false :halign "center" :spacing 16
+    (button :class "music-btn" :onclick "playerctl previous" "󰒮")
+    (button :class "music-btn music-btn-play" :onclick "playerctl play-pause"
+      {music-data.status == "Playing" ? "󰏤" : "󰐊"})
+    (button :class "music-btn" :onclick "playerctl next" "󰒭")))
+
+(defwidget music-section []
+  (box :class "card music-card" :orientation "vertical" :space-evenly false
+    (label :class "section-header" :halign "start" :text "󰎈  Música")
+    (box :class "music-content" :orientation "vertical" :space-evenly false
+      (music-info)
+      (music-controls))))
+
+; --- Janela esquerda (calendário + eventos) ---
+
+(defwindow dashboard-left
+  :monitor 0
+  :stacking "overlay"
+  :focusable true
+  :exclusive false
+  :namespace "eww-dashboard-left"
+  :geometry (geometry
+    :anchor "center left"
+    :x "16px"
+    :width "560px"
+    :height "780px")
+  (box :class "panel-container" :orientation "vertical" :space-evenly false :spacing 24
+    (cal-section)
+    (events-section)))
+
+; --- Janela direita (clima + notas + música) ---
+
+(defwindow dashboard-right
+  :monitor 0
+  :stacking "overlay"
+  :focusable true
+  :exclusive false
+  :namespace "eww-dashboard-right"
+  :geometry (geometry
+    :anchor "center right"
+    :x "16px"
+    :width "540px"
+    :height "780px")
+  (box :class "panel-container" :orientation "vertical" :space-evenly false :spacing 24
+    (weather-section)
+    (notes-section)
+    (music-section)))

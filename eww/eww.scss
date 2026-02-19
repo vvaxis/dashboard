@@ -1,0 +1,383 @@
+// EWW Dashboard — redtail (split-panel HUD)
+// Paleta redtail v2
+
+$base:        #1a1714;
+$surface:     #2a2420;
+$overlay:     #3d352e;
+$text:        #e2d5c0;
+$subtext:     #b0a48e;
+$amber:       #d4a243;
+$terracotta:  #c46d4d;
+$green:       #8aab72;
+$blue:        #7a9ec2;
+$lavender:    #b07ab8;
+$teal:        #6fa3a0;
+$red:         #c25d5d;
+$yellow:      #e0b65b;
+
+// --- Window transparency (GTK default is opaque) ---
+
+window {
+  background-color: transparent;
+}
+
+// --- Panel container (invisible layout wrapper for each side) ---
+
+.panel-container {
+  padding: 20px;
+  font-family: "Maple Mono NF", monospace;
+  color: $text;
+}
+
+// --- Card base ---
+
+.card {
+  border-radius: 14px;
+  padding: 22px;
+}
+
+// --- Calendário ---
+
+.calendar-card {
+  background-color: #362a1a;
+  border: 3px solid $amber;
+  margin-bottom: 0;
+}
+
+.cal-nav {
+  margin-bottom: 12px;
+}
+
+.cal-nav-btn {
+  font-size: 22px;
+  color: $subtext;
+  background: transparent;
+  border: none;
+  outline: none;
+  border-radius: 8px;
+  min-width: 40px;
+  min-height: 40px;
+
+  &:hover {
+    color: $amber;
+    background-color: rgba($amber, 0.2);
+  }
+
+  &:focus {
+    outline: none;
+    border: none;
+    box-shadow: none;
+  }
+}
+
+.cal-nav-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: $amber;
+  background: transparent;
+  border: none;
+  outline: none;
+  border-radius: 8px;
+  padding: 4px 12px;
+  min-height: 40px;
+
+  &:hover {
+    background-color: rgba($amber, 0.15);
+  }
+
+  &:focus {
+    outline: none;
+    border: none;
+    box-shadow: none;
+  }
+}
+
+.day-names {
+  margin-bottom: 8px;
+}
+
+.day-name {
+  font-size: 15px;
+  color: $amber;
+  min-width: 50px;
+  min-height: 30px;
+}
+
+.cal-grid {
+  margin-top: 4px;
+}
+
+.cal-week {
+  margin: 2px 0;
+}
+
+.day-cell-wrapper {
+  min-width: 50px;
+  min-height: 44px;
+}
+
+.day-cell {
+  font-size: 17px;
+  color: $text;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 10px;
+
+  &.day-empty {
+    color: transparent;
+  }
+
+  &.day-today {
+    background-color: $amber;
+    color: $base;
+    font-weight: bold;
+  }
+
+  &.day-selected {
+    background-color: rgba($blue, 0.25);
+    border: 2px solid rgba($blue, 0.7);
+    color: $blue;
+    font-weight: bold;
+  }
+
+  &.day-selected.day-today {
+    background-color: $amber;
+    border: 2px solid $blue;
+    color: $base;
+    font-weight: bold;
+  }
+}
+
+.day-cell-wrapper:hover .day-cell:not(.day-empty):not(.day-today):not(.day-selected) {
+  background-color: rgba($amber, 0.15);
+}
+
+// --- Eventos ---
+
+.events-card {
+  background-color: #33261a;
+  border: 3px solid $amber;
+  min-height: 140px;
+}
+
+.events-content {
+  padding: 0;
+}
+
+.events-empty {
+  font-size: 16px;
+  font-style: italic;
+  color: $subtext;
+  padding: 10px 0;
+}
+
+.event-row {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba($amber, 0.3);
+}
+
+.event-time {
+  font-size: 16px;
+  font-weight: bold;
+  color: $amber;
+  min-width: 60px;
+}
+
+.event-title {
+  font-size: 16px;
+  color: $text;
+}
+
+// --- Clima ---
+
+.weather-card {
+  background-color: #382b1b;
+  border: 3px solid $amber;
+}
+
+.weather-current {
+  margin-bottom: 14px;
+  padding: 4px 0;
+}
+
+.weather-icon {
+  font-size: 64px;
+  color: $amber;
+  min-width: 72px;
+}
+
+.weather-temp {
+  font-size: 30px;
+  font-weight: bold;
+  color: $text;
+}
+
+.weather-condition {
+  font-size: 16px;
+  color: $subtext;
+  margin-top: 2px;
+}
+
+.weather-highlow {
+  font-size: 16px;
+  color: $subtext;
+  padding-top: 8px;
+}
+
+.weather-details {
+  padding: 8px 0;
+  border-top: 1px solid rgba($amber, 0.3);
+  margin-bottom: 2px;
+}
+
+.weather-detail {
+  font-size: 15px;
+  color: $subtext;
+}
+
+.weather-hourly {
+  padding: 10px 0;
+  border-top: 1px solid rgba($amber, 0.3);
+  margin-bottom: 0;
+}
+
+.hourly-slot {
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+.hourly-time {
+  font-size: 15px;
+  font-weight: bold;
+  color: $subtext;
+  margin-bottom: 4px;
+}
+
+.hourly-icon {
+  font-size: 28px;
+  color: $amber;
+  margin-bottom: 6px;
+}
+
+.hourly-temp {
+  font-size: 16px;
+  color: $text;
+}
+
+.hourly-pop {
+  font-size: 14px;
+  color: $blue;
+  margin-top: 2px;
+}
+
+.weather-more {
+  margin-top: -4px;
+}
+
+.weather-more-btn {
+  font-size: 13px;
+  color: rgba($subtext, 0.7);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 2px 8px;
+
+  &:hover {
+    color: $amber;
+    background-color: rgba($amber, 0.15);
+  }
+}
+
+// --- Notas ---
+
+.notes-eventbox {
+  border-radius: 14px;
+}
+
+.notes-card {
+  background-color: #30241a;
+  border: 3px solid $amber;
+  min-height: 100px;
+
+  &:hover {
+    background-color: #3d2e20;
+  }
+}
+
+.notes-content {
+  font-size: 15px;
+  color: $subtext;
+  padding: 6px 0;
+}
+
+// --- Música ---
+
+.music-card {
+  background-color: #34271c;
+  border: 3px solid $amber;
+}
+
+.section-header {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 14px;
+  color: $amber;
+}
+
+.music-content {
+  padding: 0;
+}
+
+.music-info {
+  margin-bottom: 14px;
+}
+
+.music-title {
+  font-size: 17px;
+  font-weight: bold;
+  color: $text;
+
+  &.music-empty {
+    font-style: italic;
+    font-weight: normal;
+    color: $subtext;
+  }
+}
+
+.music-artist {
+  font-size: 16px;
+  color: $amber;
+  margin-top: 4px;
+
+  &.music-empty {
+    font-style: italic;
+    color: $subtext;
+  }
+}
+
+.music-controls {
+  margin-top: 6px;
+}
+
+.music-btn {
+  font-size: 24px;
+  color: $subtext;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  min-width: 48px;
+  min-height: 48px;
+
+  &:hover {
+    color: $amber;
+  }
+}
+
+.music-btn-play {
+  font-size: 32px;
+  color: $amber;
+
+  &:hover {
+    color: #e0b85f;
+  }
+}
